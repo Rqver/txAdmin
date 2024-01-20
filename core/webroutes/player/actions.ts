@@ -1,11 +1,12 @@
 const modulename = 'WebServer:PlayerActions';
-import humanizeDuration, { Unit } from 'humanize-duration';
+import humanizeDuration, {Unit} from 'humanize-duration';
 import playerResolver from '@core/playerLogic/playerResolver';
-import { GenericApiResp } from '@shared/genericApiTypes';
-import { PlayerClass, ServerPlayer } from '@core/playerLogic/playerClasses';
-import { anyUndefined, calcExpirationFromDuration } from '@core/extras/helpers';
+import {GenericApiResp} from '@shared/genericApiTypes';
+import {PlayerClass, ServerPlayer} from '@core/playerLogic/playerClasses';
+import {anyUndefined, calcExpirationFromDuration} from '@core/extras/helpers';
 import consoleFactory from '@extras/console';
-import { AuthedCtx } from '@core/components/WebServer/ctxTypes';
+import {AuthedCtx} from '@core/components/WebServer/ctxTypes';
+
 const console = consoleFactory(modulename);
 
 
@@ -18,7 +19,7 @@ export default async function PlayerActions(ctx: AuthedCtx) {
         return ctx.utils.error(400, 'Invalid Request');
     }
     const action = ctx.params.action;
-    const { mutex, netid, license } = ctx.query;
+    const {mutex, netid, license} = ctx.query;
     const sendTypedResp = (data: GenericApiResp) => ctx.send(data);
 
     //Finding the player
@@ -27,7 +28,7 @@ export default async function PlayerActions(ctx: AuthedCtx) {
         const refMutex = (mutex === 'current') ? ctx.txAdmin.fxRunner.currentMutex : mutex;
         player = playerResolver(refMutex, parseInt((netid as string)), license);
     } catch (error) {
-        return sendTypedResp({ error: (error as Error).message });
+        return sendTypedResp({error: (error as Error).message});
     }
 
     //Delegate to the specific action handler
@@ -44,7 +45,7 @@ export default async function PlayerActions(ctx: AuthedCtx) {
     } else if (action === 'kick') {
         return sendTypedResp(await handleKick(ctx, player));
     } else {
-        return sendTypedResp({ error: 'unknown action' });
+        return sendTypedResp({error: 'unknown action'});
     }
 };
 
@@ -58,16 +59,16 @@ async function handleSaveNote(ctx: AuthedCtx, player: PlayerClass): Promise<Gene
         ctx.request.body,
         ctx.request.body.note,
     )) {
-        return { error: 'Invalid request.' };
+        return {error: 'Invalid request.'};
     }
     const note = ctx.request.body.note.trim();
 
     try {
         player.setNote(note, ctx.admin.name);
         ctx.admin.logAction(`Set notes for ${player.license}`);
-        return { success: true };
+        return {success: true};
     } catch (error) {
-        return { error: `Failed to save note: ${(error as Error).message}` };
+        return {error: `Failed to save note: ${(error as Error).message}`};
     }
 }
 
@@ -81,25 +82,25 @@ async function handleWarning(ctx: AuthedCtx, player: PlayerClass): Promise<Gener
         ctx.request.body,
         ctx.request.body.reason,
     )) {
-        return { error: 'Invalid request.' };
+        return {error: 'Invalid request.'};
     }
     const reason = ctx.request.body.reason.trim() || 'no reason provided';
 
     //Check permissions
     if (!ctx.admin.testPermission('players.warn', modulename)) {
-        return { error: 'You don\'t have permission to execute this action.' };
+        return {error: 'You don\'t have permission to execute this action.'};
     }
 
     //Validating server & player
     if (ctx.txAdmin.fxRunner.fxChild === null) {
-        return { error: 'The server is not online.' };
+        return {error: 'The server is not online.'};
     }
     if (!(player instanceof ServerPlayer) || !player.isConnected) {
-        return { error: 'This player is not connected to the server.' };
+        return {error: 'This player is not connected to the server.'};
     }
     const allIds = player.getAllIdentifiers();
     if (!allIds.length) {
-        return { error: 'Cannot warn a player with no identifiers.' };
+        return {error: 'Cannot warn a player with no identifiers.'};
     }
 
     //Register action
@@ -114,7 +115,7 @@ async function handleWarning(ctx: AuthedCtx, player: PlayerClass): Promise<Gener
             player.displayName
         );
     } catch (error) {
-        return { error: `Failed to warn player: ${(error as Error).message}` };
+        return {error: `Failed to warn player: ${(error as Error).message}`};
     }
     ctx.admin.logAction(`Warned player [${player.netid}] ${player.displayName}: ${reason}`);
 
@@ -127,9 +128,9 @@ async function handleWarning(ctx: AuthedCtx, player: PlayerClass): Promise<Gener
     });
 
     if (cmdOk) {
-        return { success: true };
+        return {success: true};
     } else {
-        return { error: `Failed to warn player (stdin error).` };
+        return {error: `Failed to warn player (stdin error).`};
     }
 }
 
@@ -146,7 +147,7 @@ async function handleBan(ctx: AuthedCtx, player: PlayerClass): Promise<GenericAp
             ctx.request.body.reason,
         )
     ) {
-        return { error: 'Invalid request.' };
+        return {error: 'Invalid request.'};
     }
     const durationInput = ctx.request.body.duration.trim();
     const reason = (ctx.request.body.reason as string).trim() || 'no reason provided';
@@ -156,20 +157,20 @@ async function handleBan(ctx: AuthedCtx, player: PlayerClass): Promise<GenericAp
     try {
         calcResults = calcExpirationFromDuration(durationInput);
     } catch (error) {
-        return { error: (error as Error).message };
+        return {error: (error as Error).message};
     }
-    const { expiration, duration } = calcResults;
+    const {expiration, duration} = calcResults;
 
     //Check permissions
     if (!ctx.admin.testPermission('players.ban', modulename)) {
-        return { error: 'You don\'t have permission to execute this action.' }
+        return {error: 'You don\'t have permission to execute this action.'}
     }
 
-    //Validating player - hwids.length can be zero 
+    //Validating player - hwids.length can be zero
     const allIds = player.getAllIdentifiers();
     const allHwids = player.getAllHardwareIdentifiers();
     if (!allIds.length) {
-        return { error: 'Cannot ban a player with no identifiers.' }
+        return {error: 'Cannot ban a player with no identifiers.'}
     }
 
     //Register action
@@ -185,13 +186,13 @@ async function handleBan(ctx: AuthedCtx, player: PlayerClass): Promise<GenericAp
             allHwids
         );
     } catch (error) {
-        return { error: `Failed to ban player: ${(error as Error).message}` };
+        return {error: `Failed to ban player: ${(error as Error).message}`};
     }
     ctx.admin.logAction(`Banned player ${player.displayName}: ${reason}`);
 
     //No need to dispatch events if server is not online
     if (ctx.txAdmin.fxRunner.fxChild === null) {
-        return { success: true };
+        return {success: true};
     }
 
     //Prepare and send command
@@ -230,9 +231,9 @@ async function handleBan(ctx: AuthedCtx, player: PlayerClass): Promise<GenericAp
     });
 
     if (cmdOk) {
-        return { success: true };
+        return {success: true};
     } else {
-        return { error: `Failed to ban player (stdin error).` };
+        return {error: `Failed to ban player (stdin error).`};
     }
 }
 
@@ -246,13 +247,13 @@ async function handleSetWhitelist(ctx: AuthedCtx, player: PlayerClass): Promise<
         ctx.request.body,
         ctx.request.body.status,
     )) {
-        return { error: 'Invalid request.' };
+        return {error: 'Invalid request.'};
     }
     const status = (ctx.request.body.status === 'true' || ctx.request.body.status === true);
 
     //Check permissions
     if (!ctx.admin.testPermission('players.whitelist', modulename)) {
-        return { error: 'You don\'t have permission to execute this action.' }
+        return {error: 'You don\'t have permission to execute this action.'}
     }
 
     try {
@@ -265,7 +266,7 @@ async function handleSetWhitelist(ctx: AuthedCtx, player: PlayerClass): Promise<
 
         //No need to dispatch events if server is not online
         if (ctx.txAdmin.fxRunner.fxChild === null) {
-            return { success: true };
+            return {success: true};
         }
 
         ctx.txAdmin.fxRunner.sendEvent('whitelistPlayer', {
@@ -275,9 +276,9 @@ async function handleSetWhitelist(ctx: AuthedCtx, player: PlayerClass): Promise<
             adminName: ctx.admin.name,
         });
 
-        return { success: true };
+        return {success: true};
     } catch (error) {
-        return { error: `Failed to save whitelist status: ${(error as Error).message}` };
+        return {error: `Failed to save whitelist status: ${(error as Error).message}`};
     }
 }
 
@@ -291,24 +292,24 @@ async function handleMessage(ctx: AuthedCtx, player: PlayerClass): Promise<Gener
         ctx.request.body,
         ctx.request.body.message,
     )) {
-        return { error: 'Invalid request.' };
+        return {error: 'Invalid request.'};
     }
     const message = ctx.request.body.message.trim();
     if (!message.length) {
-        return { error: 'Cannot send a DM with empty message.' };
+        return {error: 'Cannot send a DM with empty message.'};
     }
 
     //Check permissions
     if (!ctx.admin.testPermission('players.message', modulename)) {
-        return { error: 'You don\'t have permission to execute this action.' };
+        return {error: 'You don\'t have permission to execute this action.'};
     }
 
     //Validating server & player
     if (ctx.txAdmin.fxRunner.fxChild === null) {
-        return { error: 'The server is not online.' };
+        return {error: 'The server is not online.'};
     }
     if (!(player instanceof ServerPlayer) || !player.isConnected) {
-        return { error: 'This player is not connected to the server.' };
+        return {error: 'This player is not connected to the server.'};
     }
 
     try {
@@ -321,9 +322,9 @@ async function handleMessage(ctx: AuthedCtx, player: PlayerClass): Promise<Gener
             message,
         });
 
-        return { success: true };
+        return {success: true};
     } catch (error) {
-        return { error: `Failed to save dm player: ${(error as Error).message}` };
+        return {error: `Failed to save dm player: ${(error as Error).message}`};
     }
 }
 
@@ -337,24 +338,39 @@ async function handleKick(ctx: AuthedCtx, player: PlayerClass): Promise<GenericA
         ctx.request.body,
         ctx.request.body.reason,
     )) {
-        return { error: 'Invalid request.' };
+        return {error: 'Invalid request.'};
     }
     const reason = ctx.request.body.reason.trim() || 'no reason provided';
 
     //Check permissions
     if (!ctx.admin.testPermission('players.kick', modulename)) {
-        return { error: 'You don\'t have permission to execute this action.' };
+        return {error: 'You don\'t have permission to execute this action.'};
     }
 
     //Validating server & player
     if (ctx.txAdmin.fxRunner.fxChild === null) {
-        return { error: 'The server is not online.' };
+        return {error: 'The server is not online.'};
     }
     if (!(player instanceof ServerPlayer) || !player.isConnected) {
-        return { error: 'This player is not connected to the server.' };
+        return {error: 'This player is not connected to the server.'};
+    }
+
+    const allIds = player.getAllIdentifiers();
+    if (!allIds.length) {
+        return {error: 'Cannot warn a player with no identifiers.'};
     }
 
     try {
+        //Register action
+        ctx.txAdmin.playerDatabase.registerAction(
+            allIds,
+            'kick',
+            ctx.admin.name,
+            reason,
+            false,
+            player.displayName
+        );
+
         ctx.admin.logAction(`Kicked #${player.displayName}: ${reason}`);
 
         // Dispatch `txAdmin:events:playerKicked`
@@ -364,8 +380,8 @@ async function handleKick(ctx: AuthedCtx, player: PlayerClass): Promise<GenericA
             reason,
         });
 
-        return { success: true };
+        return {success: true};
     } catch (error) {
-        return { error: `Failed to save kick player: ${(error as Error).message}` };
+        return {error: `Failed to save kick player: ${(error as Error).message}`};
     }
 }

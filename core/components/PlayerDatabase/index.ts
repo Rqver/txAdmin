@@ -11,7 +11,7 @@ const console = consoleFactory(modulename);
 
 
 //Consts
-const validActions = ['ban', 'warn'];
+const validActions = ['ban', 'warn', 'kick'];
 export class DuplicateKeyError extends Error {
     readonly code = 'DUPLICATE_KEY';
     constructor(message: string) {
@@ -219,7 +219,7 @@ export default class PlayerDatabase {
      */
     registerAction(
         ids: string[],
-        type: 'ban' | 'warn',
+        type: 'ban' | 'warn' | 'kick',
         author: string,
         reason: string,
         expiration: number | false = false,
