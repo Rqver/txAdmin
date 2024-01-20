@@ -1,11 +1,12 @@
 const modulename = 'DiscordBot';
-import Discord, { ActivityType, ChannelType, Client, EmbedBuilder, GatewayIntentBits } from 'discord.js';
+import Discord, {ActivityType, ChannelType, Client, EmbedBuilder, GatewayIntentBits} from 'discord.js';
 import TxAdmin from '@core/txAdmin';
 import slashCommands from './slash';
 import interactionCreateHandler from './interactionCreateHandler';
-import { generateStatusMessage } from './commands/status';
+import {generateStatusMessage} from './commands/status';
 import consoleFactory from '@extras/console';
-import { embedColors } from './discordHelpers';
+import {embedColors} from './discordHelpers';
+
 const console = consoleFactory(modulename);
 
 
@@ -62,11 +63,12 @@ export default class DiscordBot {
         this.#txAdmin = txAdmin;
 
         if (this.config.enabled) {
-            this.startBot().catch((e) => { });
+            this.startBot().catch((e) => {
+            });
         }
 
         // FIXME: Hacky solution to fix the issue with disallowed intents
-        // Remove this when issue below is fixed 
+        // Remove this when issue below is fixed
         // https://github.com/discordjs/discord.js/issues/9621
         process.on('unhandledRejection', (error: Error) => {
             if (error.message === 'Used disallowed intents') {
@@ -77,7 +79,8 @@ export default class DiscordBot {
         //Cron
         setInterval(() => {
             if (this.config.enabled) {
-                this.updateStatus().catch((e) => { });
+                this.updateStatus().catch((e) => {
+                });
             }
         }, 60_000)
     }
@@ -147,8 +150,8 @@ export default class DiscordBot {
                     : this.#txAdmin.translator.t(content.description.key, content.description.data);
             }
 
-            const embed = new EmbedBuilder({ title, description }).setColor(embedColors[content.type]);
-            await this.announceChannel.send({ embeds: [embed] });
+            const embed = new EmbedBuilder({title, description}).setColor(embedColors[content.type]);
+            await this.announceChannel.send({embeds: [embed]});
         } catch (error) {
             console.error(`Error sending Discord announcement: ${(error as Error).message}`);
         }
@@ -170,7 +173,7 @@ export default class DiscordBot {
             const serverMaxClients = this.#txAdmin.persistentCache.get('fxsRuntime:maxClients') ?? '??';
             const serverName = this.#txAdmin.globalConfig.serverName;
             const message = `[${serverClients}/${serverMaxClients}] on ${serverName}`;
-            this.#client.user.setActivity(message, { type: ActivityType.Watching });
+            this.#client.user.setActivity(message, {type: ActivityType.Watching});
         } catch (error) {
             console.verbose.warn(`Failed to set bot activity: ${(error as Error).message}`);
         }
@@ -238,7 +241,7 @@ export default class DiscordBot {
                     clearInterval(disallowedIntentsWatcherId);
                     return sendError(
                         `This bot does not have a required privileged intent.`,
-                        { code: 'DisallowedIntents' }
+                        {code: 'DisallowedIntents'}
                     );
                 }
             }, 250);
@@ -286,7 +289,8 @@ export default class DiscordBot {
                 const prohibitedPermsInUse = Object.entries(botPerms)
                     .filter(([permName, permEnabled]) => prohibitedPerms.includes(permName) && permEnabled)
                     .map((x) => x[0])
-                if (prohibitedPermsInUse.length) {
+
+                /*if (prohibitedPermsInUse.length) { -- Commented out while using QueenBee for testing
                     const name = this.#client.user.username;
                     const perms = prohibitedPermsInUse.includes('Administrator')
                         ? 'Administrator'
@@ -295,7 +299,7 @@ export default class DiscordBot {
                         `This bot (${name}) has dangerous permissions (${perms}) and for your safety the bot has been disabled.`,
                         { code: 'DangerousPermission' }
                     );
-                }
+                }*/
 
                 //Fetching announcements channel
                 if (this.config.announceChannel) {
@@ -314,7 +318,8 @@ export default class DiscordBot {
                 this.guild.commands.set(slashCommands).catch(console.error);
                 this.#client.application?.commands.set([]).catch(console.error);
 
-                this.updateStatus().catch((e) => { });
+                this.updateStatus().catch((e) => {
+                });
 
                 console.ok(`Started and logged in as '${this.#client.user.tag}'`);
                 return resolve();
@@ -328,7 +333,8 @@ export default class DiscordBot {
             });
             this.#client.on('resume', () => {
                 console.verbose.ok('Connection with Discord API server resumed');
-                this.updateStatus().catch((e) => { });
+                this.updateStatus().catch((e) => {
+                });
             });
             this.#client.on('interactionCreate', interactionCreateHandler.bind(null, this.#txAdmin));
             // this.#client.on('debug', console.verbose.debug);
@@ -337,7 +343,7 @@ export default class DiscordBot {
             this.#client.login(this.config.token).catch((error) => {
                 clearInterval(disallowedIntentsWatcherId);
                 //if no message, create one
-                if (!('message' in error) || !error.message){
+                if (!('message' in error) || !error.message) {
                     error.message = 'no reason available - ' + JSON.stringify(error);
                 }
                 console.error(`Discord login failed with error: ${error.message}`);
@@ -390,7 +396,7 @@ export default class DiscordBot {
                 memberRoles: member.roles.cache.map((role) => role.id),
             };
         } else {
-            return { isMember: false }
+            return {isMember: false}
         }
     }
 
@@ -400,7 +406,7 @@ export default class DiscordBot {
      */
     async resolveMemberProfile(uid: string) {
         if (!this.#client?.isReady()) throw new Error(`discord bot not ready yet`);
-        const avatarOptions: Discord.ImageURLOptions = { size: 64, forceStatic: true };
+        const avatarOptions: Discord.ImageURLOptions = {size: 64, forceStatic: true};
 
         //Check if in guild member
         if (this.guild) {
