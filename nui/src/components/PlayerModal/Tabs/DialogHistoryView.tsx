@@ -26,6 +26,7 @@ const NoHistoryBox = () => (
 const colors = {
   danger: "#c2293e",
   warning: "#f1c40f",
+  success: "#14A44D",
   dark: "gray",
 };
 
@@ -58,11 +59,18 @@ const ActionCard: React.FC<ActionCardProps> = ({
       author: action.author,
     });
   } else if (action.type == "warn") {
-    actionColor = colors.warning;
+    actionColor = colors.success;
     actionMessage = t("nui_menu.player_modal.history.warned_by", {
       author: action.author,
     });
+  } else if(action.type == "kick"){
+    actionColor = colors.warning;
+    actionMessage = t("nui_menu.player_modal.history.kicked_by", {
+      author: action.author,
+    });
   }
+
+
   if (action.revokedBy) {
     actionColor = colors.dark;
     footerNote = t("nui_menu.player_modal.history.revoked_by", {
