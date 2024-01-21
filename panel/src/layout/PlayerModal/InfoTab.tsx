@@ -1,33 +1,50 @@
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { useAdminPerms } from "@/hooks/auth";
-import { useBackendApi } from "@/hooks/fetch";
-import { PlayerModalRefType } from "@/hooks/playerModal";
-import { cn, msToDuration, tsToLocaleDate } from "@/lib/utils";
-import { GenericApiOkResp } from "@shared/genericApiTypes";
-import { PlayerModalPlayerData } from "@shared/playerApiTypes";
-import { useRef, useState } from "react";
+import {Button} from "@/components/ui/button";
+import {Label} from "@/components/ui/label";
+import {Textarea} from "@/components/ui/textarea";
+import {useAdminPerms} from "@/hooks/auth";
+import {useBackendApi} from "@/hooks/fetch";
+import {PlayerModalRefType} from "@/hooks/playerModal";
+import {cn, msToDuration, tsToLocaleDate} from "@/lib/utils";
+import {GenericApiOkResp} from "@shared/genericApiTypes";
+import {PlayerModalPlayerData} from "@shared/playerApiTypes";
+import {useRef, useState} from "react";
 
 
-function LogActionCounter({ type, count }: { type: 'Ban' | 'Warn', count: number }) {
+function LogActionCounter({type, count, style}: {
+    type: 'Ban' | 'Warn' | 'Kick',
+    count: number,
+    style?: React.CSSProperties
+}) {
     const pluralLabel = (count > 1) ? `${type}s` : type;
-    if (count === 0) {
-        return <span className={cn(
-            'rounded-sm text-xs font-semibold px-1 py-[0.125rem] tracking-widest text-center inline-block',
-            'bg-secondary text-secondary-foreground'
-        )}>
-            0 {type}s
-        </span>
-    } else {
-        return <span className={cn(
-            'rounded-sm text-xs font-semibold px-1 py-[0.125rem] tracking-widest text-center inline-block',
-            type === 'Ban' ? 'bg-destructive text-destructive-foreground' : 'bg-warning text-warning-foreground'
-        )}>
-            {count} {pluralLabel}
-        </span>
+    let backgroundClass = '';
+    let textClass = '';
+
+    switch (type) {
+        case 'Ban':
+            backgroundClass = 'bg-destructive';
+            textClass = 'text-destructive-foreground';
+            break;
+        case 'Warn':
+            backgroundClass = 'bg-success';
+            textClass = 'text-success-foreground';
+            break;
+        case 'Kick':
+            backgroundClass = 'bg-warning';
+            textClass = 'text-warning-foreground';
+            break;
+        default:
+            break;
     }
+
+    return <span style={style} className={cn(
+        'rounded-sm text-xs font-semibold px-1 py-[0.125rem] tracking-widest text-center inline-block',
+        backgroundClass,
+        textClass
+    )}>
+        {count} {pluralLabel}
+    </span>
 }
+
 
 type PlayerNotesBoxProps = {
     playerRef: PlayerModalRefType;
@@ -41,7 +58,7 @@ const calcTextAreaLines = (text?: string) => {
     return Math.min(Math.max(lines, 3), 16);
 }
 
-function PlayerNotesBox({ playerRef, player, refreshModalData }: PlayerNotesBoxProps) {
+function PlayerNotesBox({playerRef, player, refreshModalData}: PlayerNotesBoxProps) {
     const textAreaRef = useRef<HTMLTextAreaElement>(null);
     const [notesLogText, setNotesLogText] = useState(player.notesLog ?? '');
     const [textAreaLines, setTextAreaLines] = useState(calcTextAreaLines(player.notes));
@@ -89,7 +106,7 @@ function PlayerNotesBox({ playerRef, player, refreshModalData }: PlayerNotesBoxP
             onChange={() => setNotesLogText('Press enter to save.')}
             onKeyDown={handleKeyDown}
             //1rem of padding + 1.25rem per line
-            style={{ height: `${1 + 1.25 * textAreaLines}rem` }}
+            style={{height: `${1 + 1.25 * textAreaLines}rem`}}
             placeholder={player.isRegistered
                 ? 'Type your notes about the player.'
                 : 'Cannot set notes for players that are not registered.'}
@@ -114,8 +131,22 @@ type InfoTabProps = {
     refreshModalData: () => void;
 }
 
-export default function InfoTab({ playerRef, player, setSelectedTab, refreshModalData }: InfoTabProps) {
-    const { hasPerm } = useAdminPerms();
+const styles = {
+    container: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        flexWrap: 'nowrap',
+    } as React.CSSProperties,
+    counter: {
+        flex: '1 0 auto',
+        minWidth: '50px',
+        margin: '0 0.2em',
+    } as React.CSSProperties,
+};
+
+
+export default function InfoTab({playerRef, player, setSelectedTab, refreshModalData}: InfoTabProps) {
+    const {hasPerm} = useAdminPerms();
     const playerWhitelistApi = useBackendApi<GenericApiOkResp>({
         method: 'POST',
         path: `/player/whitelist`,
@@ -123,19 +154,20 @@ export default function InfoTab({ playerRef, player, setSelectedTab, refreshModa
 
     const sessionTimeText = player.sessionTime ? msToDuration(
         player.sessionTime * 60_000,
-        { units: ['h', 'm'] }
+        {units: ['h', 'm']}
     ) : '--';
     const lastConnectionText = player.tsLastConnection
         ? tsToLocaleDate(player.tsLastConnection)
         : '--';
     const playTimeText = player.playTime ? msToDuration(
         player.playTime * 60_000,
-        { units: ['d', 'h', 'm'] }
+        {units: ['d', 'h', 'm']}
     ) : '--';
     const joinDateText = player.tsJoined ? tsToLocaleDate(player.tsJoined) : '--';
     const whitelistedText = player.tsWhitelisted ? tsToLocaleDate(player.tsWhitelisted) : 'not yet';
     const banCount = player.actionHistory.filter((a) => a.type === 'ban').length;
     const warnCount = player.actionHistory.filter((a) => a.type === 'warn').length;
+    const kickCount = player.actionHistory.filter((a) => a.type === 'kick').length;
 
     const handleWhitelistClick = () => {
         playerWhitelistApi({
@@ -181,7 +213,7 @@ export default function InfoTab({ playerRef, player, setSelectedTab, refreshModa
                     <Button
                         variant="outline"
                         size='inline'
-                        style={{ minWidth: '8.25ch' }}
+                        style={{minWidth: '8.25ch'}}
                         onClick={handleWhitelistClick}
                         disabled={!hasPerm('players.whitelist')}
                     >
@@ -192,20 +224,25 @@ export default function InfoTab({ playerRef, player, setSelectedTab, refreshModa
             <div className="py-0.5 grid grid-cols-3 gap-4 px-0">
                 <dt className="text-sm font-medium leading-6 text-muted-foreground">Log</dt>
                 <dd className="text-sm leading-6 mt-0 space-x-2">
-                    <LogActionCounter type="Ban" count={banCount} />
-                    <LogActionCounter type="Warn" count={warnCount} />
+                    <div style={styles.container}>
+                        <LogActionCounter type="Ban" count={banCount} style={styles.counter}/>
+                        <LogActionCounter type="Kick" count={kickCount} style={styles.counter}/>
+                        <LogActionCounter type="Warn" count={warnCount} style={styles.counter}/>
+                    </div>
                 </dd>
                 <dd className="text-right">
                     <Button
                         variant="outline"
                         size='inline'
-                        style={{ minWidth: '8.25ch' }}
-                        onClick={() => { setSelectedTab('History') }}
+                        style={{minWidth: '8.25ch'}}
+                        onClick={() => {
+                            setSelectedTab('History')
+                        }}
                     >View</Button>
                 </dd>
             </div>
         </dl>
 
-        <PlayerNotesBox player={player} playerRef={playerRef} refreshModalData={refreshModalData} />
+        <PlayerNotesBox player={player} playerRef={playerRef} refreshModalData={refreshModalData}/>
     </div>;
 }

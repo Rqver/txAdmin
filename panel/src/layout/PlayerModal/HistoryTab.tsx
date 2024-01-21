@@ -1,9 +1,9 @@
-import { Button } from "@/components/ui/button";
-import { useAdminPerms } from "@/hooks/auth";
-import { cn, tsToLocaleDateTime } from "@/lib/utils";
-import { PlayerHistoryItem } from "@shared/playerApiTypes";
-import { useBackendApi } from "@/hooks/fetch";
-import { GenericApiOkResp } from "@shared/genericApiTypes";
+import {Button} from "@/components/ui/button";
+import {useAdminPerms} from "@/hooks/auth";
+import {cn, tsToLocaleDateTime} from "@/lib/utils";
+import {PlayerHistoryItem} from "@shared/playerApiTypes";
+import {useBackendApi} from "@/hooks/fetch";
+import {GenericApiOkResp} from "@shared/genericApiTypes";
 import InlineCode from "@/components/InlineCode";
 import PlayerModalMidMessage from "./PlayerModalMidMessage";
 
@@ -16,7 +16,7 @@ type HistoryItemProps = {
     doRevokeAction: (actionId: string) => void,
 }
 
-function HistoryItem({ action, permsDisableWarn, permsDisableBan, serverTime, doRevokeAction }: HistoryItemProps) {
+function HistoryItem({action, permsDisableWarn, permsDisableBan, serverTime, doRevokeAction}: HistoryItemProps) {
     const isRevokeDisabled = (
         !!action.revokedBy ||
         (action.type === 'warn' && permsDisableWarn) ||
@@ -28,11 +28,15 @@ function HistoryItem({ action, permsDisableWarn, permsDisableBan, serverTime, do
         borderColorClass = 'border-destructive';
         actionMessage = `BANNED by ${action.author}`;
     } else if (action.type === 'warn') {
-        borderColorClass = 'border-warning';
+        borderColorClass = 'border-success';
         actionMessage = `WARNED by ${action.author}`;
+    } else if (action.type == 'kick') {
+        borderColorClass = 'border-warning'
+        actionMessage = `KICKED by ${action.author}`
     }
+
     if (action.revokedBy) {
-        borderColorClass = '';
+        //borderColorClass = ''; -- Still show the colour of the punishment for easy viewing, disabled btn + footer is enough
         const revocationDate = tsToLocaleDateTime(action.revokedAt ?? 0, 'medium', 'short');
         footerNote = `Revoked by ${action.revokedBy} on ${revocationDate}.`;
     } else if (typeof action.exp === 'number') {
@@ -56,7 +60,9 @@ function HistoryItem({ action, permsDisableWarn, permsDisableBan, serverTime, do
                         variant="outline"
                         size='inline'
                         disabled={isRevokeDisabled}
-                        onClick={() => { doRevokeAction(action.id) }}
+                        onClick={() => {
+                            doRevokeAction(action.id)
+                        }}
                     >Revoke</Button>
                 </small>
             </div>
@@ -73,8 +79,8 @@ type HistoryTabProps = {
     refreshModalData: () => void,
 }
 
-export default function HistoryTab({ actionHistory, serverTime, refreshModalData }: HistoryTabProps) {
-    const { hasPerm } = useAdminPerms();
+export default function HistoryTab({actionHistory, serverTime, refreshModalData}: HistoryTabProps) {
+    const {hasPerm} = useAdminPerms();
     const hasWarnPerm = hasPerm('players.warn');
     const hasBanPerm = hasPerm('players.ban');
     const revokeActionApi = useBackendApi<GenericApiOkResp>({
@@ -88,9 +94,9 @@ export default function HistoryTab({ actionHistory, serverTime, refreshModalData
         </PlayerModalMidMessage>;
     }
 
-    const doRevokeAction = (actionId: string) => {
+    const doRevokeAction = (actionId: string) =>
         revokeActionApi({
-            data: { actionId },
+            data: {actionId},
             toastLoadingMessage: 'Revoking action...',
             genericHandler: {
                 successMsg: 'Action revoked.',
