@@ -94,7 +94,7 @@ export default function HistoryTab({actionHistory, serverTime, refreshModalData}
         </PlayerModalMidMessage>;
     }
 
-    const doRevokeAction = (actionId: string) =>
+    const doRevokeAction = (actionId: string) => {
         revokeActionApi({
             data: {actionId},
             toastLoadingMessage: 'Revoking action...',

@@ -1,7 +1,8 @@
-import { DatabaseActionType, DatabasePlayerType } from "@core/components/PlayerDatabase/databaseTypes";
+import {DatabaseActionType, DatabasePlayerType} from "@core/components/PlayerDatabase/databaseTypes";
 import PlayerlistManager from "@core/components/PlayerlistManager";
-import { now } from "@core/extras/helpers";
+import {now} from "@core/extras/helpers";
 import xssInstancer from '@core/extras/xss.js';
+
 const xss = xssInstancer();
 
 /**
@@ -34,18 +35,21 @@ export const processActionList = (list: DatabaseActionType[]) => {
             out.color = 'danger';
             out.message = `${xss(log.author)} BANNED ${actReference}`;
         } else if (log.type == 'warn') {
-            out.color = 'warning';
+            out.color = 'success';
             out.message = `${xss(log.author)} WARNED ${actReference}`;
+        } else if (log.type == 'kick') {
+            out.color = "warning"
+            out.message = `${xss(log.author)} KICKED ${actReference}`;
         } else {
             out.color = 'secondary';
             out.message = `${xss(log.author)} ${(log.type as any)?.toUpperCase()} ${actReference}`;
         }
         if (log.revocation.timestamp) {
-            out.color = 'dark';
+            // out.color = 'dark'; -- Once again we don't want the change of colour, the disabled btn + footer is enough
             out.isRevoked = true;
             const revocationDate = (new Date(log.revocation.timestamp * 1000)).toLocaleString();
             out.footerNote = `Revoked by ${log.revocation.author} on ${revocationDate}.`;
-        }else if (typeof log.expiration == 'number') {
+        } else if (typeof log.expiration == 'number') {
             const expirationDate = (new Date(log.expiration * 1000)).toLocaleString();
             out.footerNote = (log.expiration < tsNow) ? `Expired at ${expirationDate}.` : `Expires at ${expirationDate}.`;
         }

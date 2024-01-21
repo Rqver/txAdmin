@@ -133,7 +133,7 @@
                                 </select>
                                 <div class="row mt-2">
                                     <div class="col-sm-3 pr-0">
-                                        <input type="number" class="form-control" id="frmAddBan-durationMultiplier" 
+                                        <input type="number" class="form-control" id="frmAddBan-durationMultiplier"
                                             maxlength="3" placeholder="7" disabled>
                                     </div>
                                     <div class="col-sm-9 pl-2">
@@ -167,7 +167,7 @@
 
 
     <div class="col-md-10 col-lg-8 col-xl-5 mw-col8">
-        
+
         <!-- Search + List Card -->
         <div class="card">
             <div class="card-header card-accent-info">
@@ -188,11 +188,11 @@
                         </div>
                     </div>
                     <li class="nav-item">
-                        <a class="nav-link" id="dbPlayers-tab" data-toggle="pill" href="#dbPlayers-content" role="tab" 
+                        <a class="nav-link" id="dbPlayers-tab" data-toggle="pill" href="#dbPlayers-content" role="tab"
                             aria-controls="dbPlayers-content" aria-selected="false"><i class="icon-user"></i> Players</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" id="dbActions-tab" data-toggle="pill" href="#dbActions-content" role="tab" 
+                        <a class="nav-link active" id="dbActions-tab" data-toggle="pill" href="#dbActions-content" role="tab"
                             aria-controls="dbActions-content" aria-selected="true"><i class="icon-notebook"></i> Actions</a>
                     </li>
                 </ul>
@@ -227,7 +227,7 @@
                     <div class="tab-pane fade show active" id="dbActions-content" role="tabpanel" aria-labelledby="dbActions-tab">
                         <div id="dbActions-tabSearch" class="searchTab d-none"></div>
                         <div id="dbActions-tabDefault">
-                            <h5 class="card-title">Last <%= queryLimits.actions %> actions (bans/warns):</h5> 
+                            <h5 class="card-title">Last <%= queryLimits.actions %> actions (bans/kicks/warns):</h5>
                             <% if (!lastActions.length) { %>
                                 <div class="text-center">
                                     <h3 class="mx-auto pt-3 text-secondary">no actions yet...</h3>
@@ -251,7 +251,7 @@
                                                             <span class="badge badge-outline-light txInlineBtn txActionsBtn">REVOKE</span>
                                                         <% } else { %>
                                                             &nbsp;
-                                                            <button onclick="revokeAction('<%= action.id %>')" 
+                                                            <button onclick="revokeAction('<%= action.id %>')"
                                                                 class="btn btn-secondary txInlineBtn txActionsBtn">REVOKE</button>
                                                         <% } %>
                                                     <% } %>
@@ -392,12 +392,12 @@
         }else{
             const processed = players.map(p => `
                 <div class="list-group-item list-group-item-accent-${xss(p.color)} logEntry logEntryClickable">
-                    <div class="d-flex w-100 justify-content-between" onclick="showPlayerByLicense('${xss(p.license)}')"> 
+                    <div class="d-flex w-100 justify-content-between" onclick="showPlayerByLicense('${xss(p.license)}')">
                         <strong>${xss(p.name)}</strong>
                         <small>${xss(p.joined)}</small>
                     </div>
                 </div>`);
-            
+
             return [
                 `<div class="list-group list-group-accent">`,
                 ...processed,
@@ -421,10 +421,10 @@
                         (a.type == 'warn' && permsDisableWarn) ||
                         (a.type == 'ban' && permsDisableBan)
                     ){
-                        revokeButton = `&nbsp;<span class="badge badge-outline-light txInlineBtn txActionsBtn">REVOKE</span>`; 
+                        revokeButton = `&nbsp;<span class="badge badge-outline-light txInlineBtn txActionsBtn">REVOKE</span>`;
                     }else{
-                        revokeButton = `&nbsp;<button onclick="revokeAction('${xss(a.id)}')" 
-                                class="btn btn-secondary txInlineBtn txActionsBtn">REVOKE</button>`; 
+                        revokeButton = `&nbsp;<button onclick="revokeAction('${xss(a.id)}')"
+                                class="btn btn-secondary txInlineBtn txActionsBtn">REVOKE</button>`;
                     }
                 }
                 const reason = (a.reason !== null)? xss(a.reason) : '';
@@ -442,7 +442,7 @@
                     ${footerNote}
                 </div>`;
             });
-            
+
             return [
                 `<div class="list-group list-group-accent">`,
                 ...processed,
@@ -458,7 +458,7 @@
         performSearch();
     }
 
-    
+
 
     //============================================== Ban card
     const banCard = {
