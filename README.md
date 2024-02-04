@@ -9,7 +9,7 @@
 		Join our Discord Server: &nbsp; <a href="https://discord.gg/AFAAXzq"><img src="https://discordapp.com/api/guilds/577993482761928734/widget.png?style=shield"></img></a>
 	</h4>
 	<p align="center">
-		<b>txAdmin</b> is a <b>full featured</b> web panel to Manage & Monitor your FiveM/RedM Server remotely, in use by over <strong>21.000</strong> servers worldwide at any given time.
+		<b>txAdmin</b> is a <b>full featured</b> web panel to Manage & Monitor your FiveM/RedM Server remotely, in use by over <strong>21.000</strong> servers worldwide at any given time. <b>Modifications made by Rqver log kicks in player history.</b>
 	</p>
 	<p align="center">
 		<a href="https://zap-hosting.com/txadmin4" target="_blank" rel="noopener">
@@ -25,7 +25,7 @@
 - Recipe-based Server Deployer: create a server in under 60 seconds! ([more info](docs/recipe.md))
 - Start/Stop/Restart your server instance or resources
 - Full-featured in-game admin menu:
-	- Player Mode: NoClip, God, SuperJump
+	- Player Mode: NoClip, God, SuperJumpsss
 	- Teleport:  waypoint, coords and back
 	- Vehicle: Spawn, Fix, Delete, Boost
 	- Heal: yourself, everyone
