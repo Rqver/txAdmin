@@ -27,8 +27,8 @@ const humanizer = humanizeDuration.humanizer({
 });
 
 const footer = {
-    iconURL: 'https://i.imgur.com/Stt98Ta.png',
-    text: `Beehive RP - txAdmin ${txEnv.txAdminVersion}`,
+    iconURL: 'https://cdn.discordapp.com/emojis/1062339910654246964.webp?size=96&quality=lossless',
+    text: `txAdmin ${txEnv.txAdminVersion}`,
 }
 
 
@@ -109,7 +109,10 @@ export default async (interaction: CommandInteraction, txAdmin: TxAdmin) => {
         const bodyText: Record<string, string> = {
             'Play time': humanizer(dbData.playTime * 60 * 1000),
             'Join date': tsToLocaleDate(dbData.tsJoined),
-            'Last connection': tsToLocaleDate(dbData.tsLastConnection)
+            'Last connection': tsToLocaleDate(dbData.tsLastConnection),
+            'Whitelisted': (dbData.tsWhitelisted)
+                ? tsToLocaleDate(dbData.tsWhitelisted)
+                : 'not yet',
         };
 
         //If admin query
@@ -151,7 +154,7 @@ export default async (interaction: CommandInteraction, txAdmin: TxAdmin) => {
             description,
             footer,
         };
-        embeds.push(new EmbedBuilder(embedData).setColor('#FFA500'));
+        embeds.push(new EmbedBuilder(embedData).setColor('#4262e2'));
     }
 
     //Send embeds :)
