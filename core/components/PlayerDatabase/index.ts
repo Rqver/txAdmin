@@ -271,7 +271,7 @@ export default class PlayerDatabase {
 
 
     /**
-     * Revoke an action (ban, warn)
+     * Revoke an action (ban, kick, warn)
      */
     revokeAction(
         actionId: string,
